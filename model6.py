@@ -68,8 +68,8 @@ class AI(object):
                     # min_points[row][col] = self.evaluate_point(chessboard, row, col, -self.color)
         max_points = (max_points.flatten()).tolist()
         min_points = (min_points.flatten()).tolist()
-        # max_points = list(map(lambda x:(10 * x) if (x > 1.5 * THREE and x < BLOCK_FOUR) else (x), max_points))
-        # min_points = list(map(lambda x:(10 * x) if (x > 2 * THREE and x < BLOCK_FOUR) else (x), min_points))
+        #max_points = list(map(lambda x:(10 * x) if (x > 1.5 * THREE and x < BLOCK_FOUR) else (x), max_points))
+        #min_points = list(map(lambda x:(10 * x) if (x > 2 * THREE and x < BLOCK_FOUR) else (x), min_points))
         return max_points,min_points
 
     def evaluate_point(self, chessboard, x, y, color, direction=0):
@@ -89,6 +89,7 @@ class AI(object):
                 if(t == COLOR_NONE):
                     if(empty == -1 and i < length-1 and chessboard[x][i+1] == color):
                         empty = count
+                        continue
                     else:
                         break
                 if(t == color):
@@ -107,6 +108,7 @@ class AI(object):
                 if(t == COLOR_NONE):
                     if(empty == -1 and i > 0 and chessboard[x][i-1] == color):
                         empty = 0
+                        continue
                     else:
                         break
                 if(t == color):
@@ -178,7 +180,7 @@ class AI(object):
                 t = chessboard[tx][ty]
                 if(t == COLOR_NONE):
                     if(empty == -1 and (tx < length - 1 and ty < length - 1) and chessboard[tx+1][ty+1]):
-                        empty += count
+                        empty = count
                         continue
                     else:
                         break
@@ -264,12 +266,12 @@ class AI(object):
             result += self.count_find_score(count, block, empty)
 
         #print("pos:",x,y)
-        #print("pos:",x,y)
+        print("pos:",x,y)
         # print(result)
         return result
 
     def count_find_score(self, count, block, empty=-1):
-        # print("count:{a},block={b},empty={c}".format(a=count,b=block,c=empty))
+        print("count:{a},block={b},empty={c}".format(a=count,b=block,c=empty), end='')
         #if(empty == None):
         #    empty = 0
         #print(count, block, empty)
@@ -377,8 +379,8 @@ class AI(object):
 
     def make_decision(self):
         max_value, min_value = self.evaluate_all_chessboard(self.board)
-        #print(max_value)
-        #print(min_value)
+        print(max_value)
+        print(min_value)
         if(max(max_value) >= FIVE):
             #win directly
             new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
@@ -396,6 +398,7 @@ class AI(object):
                 if(min_value[i] >= FOUR):
                     defend_list.append((i//self.chessboard_size, i%self.chessboard_size))
             temp = float("inf")
+            new_pos = defend_list[0]
             for pos in defend_list:
                 self.board[pos[0]][pos[1]] = self.color
                 tmax, tmin = self.evaluate_all_chessboard(self.board)
@@ -413,11 +416,31 @@ class AI(object):
         elif(max(max_value) < BLOCK_FOUR + THREE and max(max_value) >= BLOCK_FOUR and max(min_value) >= 2 * THREE and max(min_value) < BLOCK_FOUR):
             #defend when only can block four but opposite has two three(not block four)
             #attack can not hit but in dangerous
-            new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
-        elif(max(min_value) >= 2 * THREE):
+            defend_list = []
+            for i in range(len(min_value)):
+                if(min_value[i] >= 2 * THREE and min_value[i] < BLOCK_FOUR):
+                    defend_list.append((i//self.chessboard_size, i%self.chessboard_size))
+            for i in range(len(max_value)):
+                if(max_value[i] < BLOCK_FOUR + THREE and max_value[i] >= BLOCK_FOUR):
+                    defend_list.append((i//self.chessboard_size, i%self.chessboard_size))
+            temp = float("inf")
+            new_pos = defend_list[0]
+            for pos in defend_list:
+                self.board[pos[0]][pos[1]] = self.color
+                tmax, tmin = self.evaluate_all_chessboard(self.board)
+                if(max(tmin) <= temp):
+                    if(not(max(tmin) >= FOUR or (max(tmin) >= 2 * THREE and max(tmin) < BLOCK_FOUR) or (max(tmin) >= BLOCK_FOUR + THREE))):
+                        temp = max(tmin)
+                        new_pos = pos
+                self.board[pos[0]][pos[1]] = COLOR_NONE
+            #new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
+        elif(max(max_value) < BLOCK_FOUR and max(min_value) >= 2 * THREE):
             #defend two three
             new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
-
+        #elif(max(min_value) >= THREE):
+         #   new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
+        #elif(max(max_value) >= THREE):
+         #   new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
         #此处还要写对连二的判断
 
         elif(max(max_value) >= 1.15 * max(min_value)):
