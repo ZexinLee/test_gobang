@@ -61,11 +61,11 @@ class CodeCheck():
     
     def __check_go (self, chessboard):
         self.agent = imp.load_source('AI', self.script_file_path).AI(self.chessboard_size, -1, self.time_out)
-        try:
-            self.agent.go(np.copy(chessboard))
-        except Exception:
-            self.errormsg = "Error:" + traceback.format_exc()
-            return False
+        #try:
+        self.agent.go(np.copy(chessboard))
+        #except Exception:
+        #self.errormsg = "Error:" + traceback.format_exc()
+        #return False
         return True
     
     def __check_result (self, chessboard, result):
@@ -79,7 +79,7 @@ class CodeCheck():
         # empty chessboard
         if not self.__check_go(np.zeros((self.chessboard_size, self.chessboard_size), dtype=np.int)):
             return False
-    
+        
         # only one empty position remain
         chessboard = np.ones((self.chessboard_size, self.chessboard_size))
         chessboard[:, ::2] = -1
@@ -87,7 +87,8 @@ class CodeCheck():
             chessboard[i] = -chessboard[i]
         x, y = np.random.choice(self.chessboard_size, 2)
         chessboard[x, y] = 0
-    
+        # print(chessboard)
+
         if not self.__check_result(chessboard, [[x, y]]):
             return False
 
@@ -95,6 +96,7 @@ class CodeCheck():
     
     def __check_advance_chessboard (self):
         # win
+        print("read")
         chessboard = np.zeros((self.chessboard_size, self.chessboard_size), dtype=np.int)
         chessboard[0, 0:4] = -1
         chessboard[1, 0:4] = 1
@@ -116,7 +118,7 @@ class CodeCheck():
         chessboard[1, 6:8] = 1
         chessboard[2:4, 8] = 1
         if not self.__check_result(chessboard, [[1, 3]]):
-            return False
+           return False
     
         # defense
         chessboard = np.zeros((self.chessboard_size, self.chessboard_size), dtype=np.int)
