@@ -406,6 +406,10 @@ class AI(object):
         elif(max(min_value) >= FOUR):
             #defend alive four
             new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
+        elif(max(max_value) >= 2 * BLOCK_FOUR):
+            new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
+        elif(max(min_value) >= 2 * BLOCK_FOUR):
+            new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
         elif(max(max_value) >= 1.1 * BLOCK_FOUR):
             #attack block four+more than an alive three
             new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
