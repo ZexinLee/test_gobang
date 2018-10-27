@@ -18,7 +18,7 @@ model2.py: add evaluation fucntion, can pass base test \
 model3.py: add branches judgment for evaluated points \
 model4.py: advanced branches judgment, can't pass advanced test \
 model5.py(not finished): give up evaluation_points, add evaluation_board and alpha-beta pruning \
-model6.py(behave worse than model4): modify model4, add more branches judgment and complete 2 layers searching, can pass advanced test \
+model6.py: modify model4, add more branches judgment and complete 2 layers searching, can pass advanced test, add attack parameters for black. \
 
 
 Model4.py is best now. \
