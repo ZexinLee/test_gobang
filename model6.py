@@ -32,13 +32,62 @@ class AI(object):
         self.board = []
 
     # If your are the first, this function will be used.
-    def first_chess(self):
+    def first_black(self):
+        # first black to put at sun
         assert self.color == COLOR_BLACK
         self.candidate_list.clear()
-        #==================================================================
-        #Here you can put your first piece
-        #for example, you can put your piece on sun（天元）
         self.candidate_list.append((self.chessboard_size//2,self.chessboard_size//2))
+
+    def second_black(self)->bool:
+        # second black to confirm win formula
+        assert self.color == COLOR_BLACK
+        self.candidate_list.clear()
+        sun = (self.chessboard_size//2,self.chessboard_size//2)
+        # 花月(Hua Yue)
+        if(self.board[sun[0] - 1][sun[1]] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] - 1,sun[1] - 1))
+            print("花月1")
+        if(self.board[sun[0]][sun[1] - 1] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] - 1,sun[1] - 1))
+            print("花月2")
+        if(self.board[sun[0]][sun[1] + 1] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] + 1,sun[1] + 1))
+            print("花月3")
+        if(self.board[sun[0] + 1][sun[1]] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] + 1,sun[1] + 1))
+            print("花月4")
+        # 浦月(Pu Yue)
+        if(self.board[sun[0] - 1][sun[1] - 1] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] - 1,sun[1] + 1))
+            print("浦月1")
+        if(self.board[sun[0] - 1][sun[1] + 1] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] - 1,sun[1] - 1))
+            print("浦月2")
+        if(self.board[sun[0] + 1][sun[1] - 1] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] + 1,sun[1] + 1))
+            print("浦月3")
+        if(self.board[sun[0] + 1][sun[1] + 1] == COLOR_WHITE):
+            self.candidate_list.append((sun[0] - 1,sun[1] + 1))
+            print("浦月4")
+        if(len(self.candidate_list)==0):
+            print("对面太菜了，随便下")
+            test_list = [(self.chessboard_size//2 - 1,self.chessboard_size//2 - 1),
+                (self.chessboard_size//2 - 1,self.chessboard_size//2 + 1),
+                (self.chessboard_size//2 + 1,self.chessboard_size//2 - 1),
+                (self.chessboard_size//2 + 1,self.chessboard_size//2 + 1),
+            ]
+            white_point = np.where(self.board == COLOR_WHITE)
+            white_point = list(zip(white_point[0], white_point[1]))
+            for pos in test_list:
+                delta_x1 = self.chessboard_size//2 - pos[0]
+                delta_y1 = self.chessboard_size//2 - pos[1]
+                delta_x2 = white_point[0][0] - self.chessboard_size//2
+                delta_y2 = white_point[0][1] - self.chessboard_size//2
+                if(delta_x1/delta_x2 != delta_y1/delta_y2):
+                    self.candidate_list.append(pos)
+                    break
+            # self.candidate_list.append((sun[0] + 1,sun[1] + 1))
+
 
     def nearby_chess(self, x, y, chessboard):
         # empty and in 2 steps
@@ -266,12 +315,12 @@ class AI(object):
             result += self.count_find_score(count, block, empty)
 
         #print("pos:",x,y)
-        print("pos:",x,y)
+        # print("pos:",x,y)
         # print(result)
         return result
 
     def count_find_score(self, count, block, empty=-1):
-        print("count:{a},block={b},empty={c}".format(a=count,b=block,c=empty), end='')
+        # print("count:{a},block={b},empty={c}".format(a=count,b=block,c=empty), end='')
         #if(empty == None):
         #    empty = 0
         #print(count, block, empty)
@@ -379,8 +428,8 @@ class AI(object):
 
     def make_decision(self):
         max_value, min_value = self.evaluate_all_chessboard(self.board)
-        print(max_value)
-        print(min_value)
+        # print(max_value)
+        # print(min_value)
         if(max(max_value) >= FIVE):
             #win directly
             new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
@@ -442,14 +491,20 @@ class AI(object):
         #elif(max(max_value) >= THREE):
          #   new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
         #此处还要写对连二的判断
-
-        elif(max(max_value) >= 1.15 * max(min_value)):
-            #attack when holding advantage
-            new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
+        elif(self.color == COLOR_WHITE):
+            if(max(max_value) >= 1.15 * max(min_value)):
+                #attack when holding advantage
+                new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
+            else:
+                #defend
+                new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
         else:
-            #defend
-            new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
-
+            if(max(max_value) >= 0.8 * max(min_value)):
+                #attack when holding advantage
+                new_pos = (max_value.index(max(max_value))//self.chessboard_size, max_value.index(max(max_value))%self.chessboard_size)
+            else:
+                #defend
+                new_pos = (min_value.index(max(min_value))//self.chessboard_size, min_value.index(max(min_value))%self.chessboard_size)
         return new_pos
 
     def go(self, chessboard):
@@ -462,13 +517,21 @@ class AI(object):
 
         idx = np.where(chessboard == COLOR_NONE)
         idx = list(zip(idx[0], idx[1]))
-
-        # first at sun
-        if(len(idx) == self.chessboard_size ** 2):
-                self.first_chess()
-                return;
-
         self.board = chessboard
+
+        '''
+            Black_first win directly
+            花月(Hua Yue)
+            浦月(Pu Yue)
+        '''
+        if(len(idx) == self.chessboard_size ** 2):
+            self.first_black()
+            return
+        if(len(idx) == self.chessboard_size ** 2 - 2):
+            self.second_black()
+            return
+
+       
         new_pos = self.make_decision()
         print("new pos is :",new_pos)
         #==============Find new pos========================================
