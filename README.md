@@ -19,7 +19,7 @@ model6.py: modify model4, add more branches judgment and complete 2 layers searc
 ### Testing
 
 #### GUI Test:
-Just 'python test.py', use model6 as testbench.
+Just `python test.py`, use model6 as testbench.
 
 #### Usability Test:
 1.[x,y] \
